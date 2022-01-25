@@ -1,0 +1,495 @@
+{
+  "active": true,
+  "connections": {
+    "Zendesk": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Initialize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF There is comments": {
+      "main": [
+        [
+          {
+            "node": "Add count to response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Response not found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request (Get comments)": {
+      "main": [
+        [
+          {
+            "node": "Format response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "Missing ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get first ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF1": {
+      "main": [
+        [
+          {
+            "node": "Missing orderId",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add count to response": {
+      "main": [
+        [
+          {
+            "node": "Final response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response not found": {
+      "main": [
+        [
+          {
+            "node": "Final response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF2": {
+      "main": [
+        [
+          {
+            "node": "Zendesk - Without eventId",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Zendesk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zendesk - Without eventId": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize": {
+      "main": [
+        [
+          {
+            "node": "IF1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get first ticket": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request (Get comments)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format response": {
+      "main": [
+        [
+          {
+            "node": "IF There is comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2022-01-19T10:51:28.408Z",
+  "id": "1008",
+  "name": "[QA] QTT-5252 (Get ticket comments by orderId or eventId)",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        820,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {
+          "query": "=custom_field_{{$node[\"Initialize\"].json[\"env\"][\"eventId\"]}}:{{$json[\"query\"][\"eventId\"]}} custom_field_{{$node[\"Initialize\"].json[\"env\"][\"orderId\"]}}:{{$json[\"query\"][\"orderId\"]}} external_id:1_{{$json[\"query\"][\"orderId\"]}}"
+        }
+      },
+      "name": "Zendesk",
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
+      "position": [
+        460,
+        570
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "zendeskApi": {
+          "id": "10",
+          "name": "Zendesk (admin)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "path": "qa/messages",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        370
+      ],
+      "webhookId": "f8f9cf88-8785-4b48-aa0d-6545ce903825",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6",
+          "name": "CustomHeader Saddem"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "message",
+              "value": "There is no comment for this order"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Response not found",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1670,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "number": [],
+          "string": [
+            {
+              "name": "count",
+              "value": "={{$node[\"HTTP Request (Get comments)\"].json[\"count\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Add count to response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1670,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$node[\"HTTP Request (Get comments)\"].json[\"count\"]}}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "name": "IF There is comments",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "url": "=https://quotatis1612253627.zendesk.com/api/v2/tickets/{{$json[\"id\"]}}/comments",
+        "options": {},
+        "queryParametersUi": {
+          "parameter": []
+        }
+      },
+      "name": "HTTP Request (Get comments)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        950,
+        240
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "9",
+          "name": "Zendesk sandbox (admin)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$items()[0].json.id}}",
+              "operation": "isEmpty"
+            }
+          ],
+          "string": []
+        },
+        "combineOperation": "any"
+      },
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        680,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Webhook\"].json[\"query\"][\"orderId\"]}}",
+              "operation": "isEmpty"
+            }
+          ],
+          "boolean": []
+        },
+        "combineOperation": "any"
+      },
+      "name": "IF1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        50,
+        370
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Final response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"messages\":[], \"count\": 0}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "name": "Missing ticket",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        810,
+        70
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"message\": \"orderId is missing\"}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "name": "Missing orderId",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        270,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"query\"][\"eventId\"]}}",
+              "operation": "isEmpty"
+            }
+          ]
+        }
+      },
+      "name": "IF2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        260,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {
+          "query": "=custom_field_{{$node[\"Initialize\"].json[\"env\"][\"eventId\"]}}: custom_field_{{$node[\"Initialize\"].json[\"env\"][\"orderId\"]}}:{{$node[\"Webhook\"].json[\"query\"][\"orderId\"]}} external_id:1_{{$node[\"Webhook\"].json[\"query\"][\"orderId\"]}}"
+        }
+      },
+      "name": "Zendesk - Without eventId",
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
+      "position": [
+        460,
+        340
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "zendeskApi": {
+          "id": "10",
+          "name": "Zendesk (admin)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "for (item of items) {\n  const body = item.json['body'];\n  item.json.env = {};\n  item.json.env.eventType = 4415180709778;\n  item.json.env.eventId = 1900001215354;\n  item.json.env.orderId = 360023310760;\n  item.json.env.app = 'qa';\n}\n\nreturn items;"
+      },
+      "name": "Initialize",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -110,
+        370
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "var newItems = [];\nfor (item of items) {\n  newItems.push(item);\n  break;\n}\n\nreturn newItems;"
+      },
+      "name": "Get first ticket",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        860,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const newItems = {};\nnewItems.json = {};\nnewItems.json.messages = [];\nconst app = $node[\"Initialize\"].json[\"env\"][\"app\"];\nconst baseUrl = `https://quotatisdev.app.n8n.cloud/webhook/${app}/attachments?id=`;\n\nfor (item of items) {\n  if (Array.isArray(item.json.comments)) {\n    item.json.comments.forEach(function(comment) {\n      let attachments = [];\n      if(comment.attachments.length === 0) {\n        attachments = comment.attachments\n      } else {\n        comment.attachments.forEach(function(attachment, index) {\n          attachments.push({\n            url: `${baseUrl}${comment.attachments[index].id}`,\n            filename: comment.attachments[index].file_name,\n            contentType: comment.attachments[index].content_type\n          })\n        })\n      } \n      newItems.json.messages.push({\n        id : comment.id,\n        message : comment.body,\n        authorEmail : comment.via.source.to.address,\n        created_at : comment.created_at,\n        attachments : attachments\n      });\n    })\n  }\n}\n\nreturn [newItems];\n"
+      },
+      "name": "Format response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1150,
+        240
+      ]
+    }
+  ],
+  "settings": {},
+  "staticData": null,
+  "tags": [
+    {
+      "id": "2",
+      "name": "qa",
+      "createdAt": "2022-01-19T10:51:15.013Z",
+      "updatedAt": "2022-01-19T10:51:15.013Z"
+    }
+  ],
+  "updatedAt": "2022-01-21T16:25:04.646Z"
+}
