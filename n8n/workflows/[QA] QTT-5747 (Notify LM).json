@@ -1,0 +1,218 @@
+{
+  "active": true,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Initialize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize": {
+      "main": [
+        [
+          {
+            "node": "Get comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get comments": {
+      "main": [
+        [
+          {
+            "node": "Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "POST partners-api",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2022-01-20T09:22:33.126Z",
+  "id": "1009",
+  "name": "[QA] QTT-5747 (Notify LM)",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "httpMethod": "POST",
+        "path": "qa/notifications",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        410,
+        540
+      ],
+      "webhookId": "8fd68803-fbc8-4c70-a22c-67a9b99ccac1",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "12",
+          "name": "zendesk-n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1450,
+        410
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "for (item of items) {\n  const body = item.json['body'];\n  item.json.env = {};\n  item.json.env.cloudamqpHost = \"https:\\/\\/big-porcupine.rmq.cloudamqp.com\";\n  item.json.env.cloudamqpAuth = \"Basic ZGV2ZWxvcGVyczphSzhqVkN1aE59JEFNUyNt\";\n  item.json.env.partnerId = 1;\n  \n  item.json.id = body.id;\n  item.json.orderId = body.orderId;\n  item.json.eventId = body.eventId;\n  item.json.ticketId = body.ticketId;\n  item.json.requesterId = body.requesterId;\n  item.json.message = body.message;\n  item.json.authorEmail = body.authorEmail;\n  item.json.authorFullName = body.authorFullName;\n\n}\n\nreturn items;\n"
+      },
+      "name": "Initialize",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        610,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "var payload = {};\npayload.json = {};\nfor (item of items) {\n  const comments = item.json.comments;\n  for (comment of comments) {\n    if ($node[\"Initialize\"].json[\"id\"] == comment.id) {\n      if (comment.author_id == $node[\"Initialize\"].json[\"requesterId\"]) {\n        break;\n      }\n      \n      payload.json.id =  comment.id;\n      \n      payload.json.orderId =  $node[\"Initialize\"].json[\"orderId\"];\n      payload.json.eventId =  $node[\"Initialize\"].json[\"eventId\"];\n      payload.json.authorEmail =  $node[\"Initialize\"].json[\"authorEmail\"];\n      payload.json.message =  ($node[\"Initialize\"].json[\"message\"] + \"\\n\\n\" + $node[\"Initialize\"].json[\"authorFullName\"]).replace(/[\\n\"\\&\\r\\t\\b\\f]/g, '\\\\\\\\n');\n      payload.json.createdAt =  comment.created_at;\n      var attachments_object = [];\n      for (attachment of comment.attachments) {\n          var attachment_object = {};\n          attachment_object.url = \"https://quotatisdev.app.n8n.cloud/webhook/attachments?id=\" + attachment.id;\n          attachment_object.contentType = attachment.content_type;\n          attachment_object.fileName = attachment.file_name;\n          attachments_object.push(attachment_object);\n      }\n      payload.json.attachments = JSON.stringify(attachments_object).split(\"\\\"\").join(\"\\\\\\\"\");\n      \n      break;\n    }\n  }\n}\n\nreturn [payload];"
+      },
+      "name": "Format",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1010,
+        540
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "url": "=https://quotatis1612253627.zendesk.com/api/v2/tickets/{{$node[\"Initialize\"].json[\"ticketId\"]}}/comments?sort_order=desc",
+        "options": {}
+      },
+      "name": "Get comments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        810,
+        540
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "9",
+          "name": "Zendesk sandbox (admin)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Format\"].json[\"id\"]}}",
+              "operation": "isEmpty"
+            }
+          ]
+        }
+      },
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1210,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "requestMethod": "POST",
+        "url": "={{$node[\"Initialize\"].json[\"env\"][\"cloudamqpHost\"]}}/api/exchanges/quotatis/partners_notify_partner_ex/publish",
+        "jsonParameters": true,
+        "options": {
+          "bodyContentType": "json",
+          "bodyContentCustomMimeType": "application/json"
+        },
+        "bodyParametersJson": "={\n \"vhost\": \"quotatis\",\n \"name\": \"partners_notify_partner_ex\",\n \"properties\": {\n \"delivery_mode\": 2,\n \"headers\": {}\n },\n \"routing_key\": \"\",\n \"delivery_mode\": \"2\",\n \"payload\": \"{\\\"partnerId\\\":{{$node[\"Initialize\"].json[\"env\"][\"partnerId\"]}}, \\\"event\\\":\\\"event_new_message\\\",\\\"data\\\":{\\\"id\\\":{{$node[\"Format\"].json[\"id\"]}},\\\"orderId\\\":\\\"{{$node[\"Format\"].json[\"orderId\"]}}\\\",\\\"eventId\\\":\\\"{{$node[\"Format\"].json[\"eventId\"]}}\\\",\\\"message\\\":\\\"{{$node[\"Format\"].json[\"message\"]}}\\\",\\\"createdAt\\\":\\\"{{$node[\"Format\"].json[\"createdAt\"]}}\\\",\\\"authorEmail\\\":\\\"{{$node[\"Format\"].json[\"authorEmail\"]}}\\\", \\\"attachments\\\":{{$node[\"Format\"].json[\"attachments\"]}}}}\",\n \"headers\": {},\n \"props\": {},\n \"payload_encoding\": \"string\"\n}"
+      },
+      "name": "POST partners-api",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        650
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "13",
+          "name": "Cloudamqp"
+        }
+      }
+    }
+  ],
+  "settings": {},
+  "staticData": null,
+  "tags": [
+    {
+      "id": "2",
+      "name": "qa",
+      "createdAt": "2022-01-19T10:51:15.013Z",
+      "updatedAt": "2022-01-19T10:51:15.013Z"
+    }
+  ],
+  "updatedAt": "2022-01-20T09:36:31.690Z"
+}
