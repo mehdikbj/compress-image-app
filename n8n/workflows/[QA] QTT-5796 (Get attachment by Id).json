@@ -1,0 +1,225 @@
+{
+  "active": true,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Function",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2022-01-20T09:27:25.752Z",
+  "id": "1012",
+  "name": "[QA] QTT-5796 (Get attachment by Id)",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        40,
+        70
+      ]
+    },
+    {
+      "parameters": {
+        "path": "=qa/attachments",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -370,
+        400
+      ],
+      "webhookId": "a9cde79a-5830-4916-bb67-13336ea33481"
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "url": "=https://quotatis1612253627.zendesk.com/api/v2/attachments/{{$json[\"query\"][\"id\"]}}",
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "cache-control",
+              "value": "no-cache"
+            }
+          ]
+        }
+      },
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        400
+      ],
+      "alwaysOutputData": false,
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "9",
+          "name": "Zendesk sandbox (admin)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"attachment\"][\"id\"]}}",
+              "operation": "isEmpty"
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        210,
+        400
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"code\":\"400\", \"description\":\"Missing Attachments\"}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        460,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$node[\"HTTP Request\"].json[\"attachment\"][\"content_url\"]}}",
+        "responseFormat": "file",
+        "options": {}
+      },
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        480,
+        470
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "binary",
+        "responseDataSource": "set",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "={{$node[\"HTTP Request\"].json[\"attachment\"][\"content_type\"]}}"
+              },
+              {
+                "name": "Content-Disposition",
+                "value": "=attachment; filename=\"{{$node[\"Function\"].json[\"utf8Name\"]}}\""
+              }
+            ]
+          }
+        }
+      },
+      "name": "Respond to Webhook1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        740,
+        470
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Code here will run only once, no matter how many input items there are.\n// More info and help: https://docs.n8n.io/nodes/n8n-nodes-base.function\n\n// Loop over inputs and add a new field called 'myNewField' to the JSON of each one\nfor (item of items) {\n  item.json.utf8Name = encodeURI(item.json.attachment.file_name);\n}\n\n// You can write logs to the browser console\nconsole.log('Done!');\n\nreturn items;"
+      },
+      "name": "Function",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        40,
+        400
+      ]
+    }
+  ],
+  "settings": {},
+  "staticData": null,
+  "tags": [
+    {
+      "id": "2",
+      "name": "qa",
+      "createdAt": "2022-01-19T10:51:15.013Z",
+      "updatedAt": "2022-01-19T10:51:15.013Z"
+    }
+  ],
+  "updatedAt": "2022-01-20T09:28:08.417Z"
+}
