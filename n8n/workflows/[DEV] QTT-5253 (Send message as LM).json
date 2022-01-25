@@ -1,0 +1,719 @@
+{
+  "active": true,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Initialize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "Missing input data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "users/me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF1": {
+      "main": [
+        [
+          {
+            "node": "Missing author",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ticket not existing?": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Use existing ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use existing ticket": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "IF2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Zendesk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zendesk": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "users/me": {
+      "main": [
+        [
+          {
+            "node": "IF1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "check tickets orderId/eventId",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check tickets orderId/eventId": {
+      "main": [
+        [
+          {
+            "node": "Ticket not existing?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "IF4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get files": {
+      "main": [
+        [
+          {
+            "node": "upload attachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "split attachments": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "upload attachments": {
+      "main": [
+        [
+          {
+            "node": "combine upload tokens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "combine upload tokens": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF3": {
+      "main": [
+        [],
+        [
+          {
+            "node": "split attachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF4": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "get files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2021-12-29T14:10:50.751Z",
+  "id": "1004",
+  "name": "[DEV] QTT-5253 (Send message as LM)",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        120,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "dev/messages",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        430
+      ],
+      "webhookId": "156b71fc-4dd0-4bd7-9ab3-599eba3aad0a"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"body\"][\"orderId\"]}}",
+              "operation": "isEmpty"
+            },
+            {
+              "value1": "={{$json[\"body\"][\"authorEmail\"]}}",
+              "operation": "isEmpty"
+            },
+            {
+              "value1": "={{$json[\"body\"][\"message\"]}}",
+              "operation": "isEmpty"
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        430
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [],
+          "string": [
+            {
+              "value1": "={{$json[\"user\"][\"id\"]}}",
+              "operation": "isEmpty"
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "name": "IF1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        240,
+        530
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"code\":\"400\", \"description\":\"Missing author\"}",
+        "options": {}
+      },
+      "name": "Missing author",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        480,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"code\":\"400\", \"description\":\"Missing input data\"}",
+        "options": {}
+      },
+      "name": "Missing input data",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        20,
+        290
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"id\"]}}",
+              "operation": "isEmpty"
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "name": "Ticket not existing?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        760
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "id": "={{$json[\"id\"]}}",
+        "jsonParameters": true,
+        "updateFieldsJson": "={\"status\":\"pending\", \"comment\": { \"body\": \"{{$node[\"Webhook\"].json[\"body\"][\"message\"]}} \\n \\n{{$node[\"Initialize\"].json[\"authorFullName\"]}} \", \"author_id\":{{$node[\"users/me\"].json[\"user\"][\"id\"]}}, \"uploads\":[\"{{$node[\"combine upload tokens\"].json[\"data\"].join('\", \"')}}\"]}}"
+      },
+      "name": "Use existing ticket",
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
+      "position": [
+        2270,
+        860
+      ],
+      "credentials": {
+        "zendeskApi": {
+          "id": "10",
+          "name": "Zendesk (admin)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"code\":\"200\", \"url\":\"https://quotatis1612253627.zendesk.com/agent/tickets/{{$json[\"id\"]}}\"}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        2570,
+        870
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "url": "={{$node[\"Initialize\"].json[\"urlEngine\"]}}/engine/incidents/{{$node[\"Webhook\"].json[\"body\"][\"eventId\"]}}",
+        "options": {}
+      },
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        2290,
+        660
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "7",
+          "name": "LM API Key"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"id\"]}}",
+              "operation": "isEmpty"
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "name": "IF2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        2490,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"code\":\"400\", \"description\":\"Missing event\"}",
+        "options": {}
+      },
+      "name": "Respond to Webhook1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        2730,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "description": "={{$node[\"Webhook\"].json[\"body\"][\"message\"]}}",
+        "jsonParameters": true,
+        "additionalFieldsJson": "={\n\"requester_id\":{{$node[\"users/me\"].json[\"user\"][\"id\"]}},\n\"submitter_id\":{{$node[\"users/me\"].json[\"user\"][\"id\"]}},\n\"external_id\":\"1_{{$node[\"Webhook\"].json[\"body\"][\"orderId\"]}}\",\n\"recipient\":\"poseleroymerlin@quotatis1612253627.zendesk.com\",\n\"subject\": \"Commande [{{$node[\"Webhook\"].json[\"body\"][\"orderId\"]}}] - Evénement [{{$node[\"Webhook\"].json[\"body\"][\"eventId\"]}}]\",\n\"comment\": {\"body\":\"{{$node[\"Webhook\"].json[\"body\"][\"message\"]}} \\n \\n{{$node[\"Initialize\"].json[\"authorFullName\"]}}\", \"uploads\":[\"{{$node[\"combine upload tokens\"].json[\"data\"].join('\", \"')}}\"]},\n\"status\":\"pending\",\n\"custom_fields\":[\n{\n\"id\":{{$node[\"Initialize\"].json[\"env\"][\"eventId\"]}},\n\"value\":\"{{$node[\"Webhook\"].json[\"body\"][\"eventId\"]}}\"\n},\n{\n\"id\":{{$node[\"Initialize\"].json[\"env\"][\"orderId\"]}},\n\"value\":\"{{$node[\"Webhook\"].json[\"body\"][\"orderId\"]}}\"\n}\n]\n}"
+      },
+      "name": "Zendesk",
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
+      "position": [
+        2770,
+        720
+      ],
+      "credentials": {
+        "zendeskApi": {
+          "id": "10",
+          "name": "Zendesk (admin)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"code\":\"200\", \"url\":\"https://quotatis1612253627.zendesk.com/agent/tickets/{{$json[\"id\"]}}\"}",
+        "options": {}
+      },
+      "name": "Respond to Webhook2",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        3000,
+        730
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "url": "=https://quotatis1612253627.zendesk.com/api/v2/tickets?external_id=1_{{$node[\"Webhook\"].json[\"body\"][\"orderId\"]}}",
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "cache-control",
+              "value": "no-cache"
+            }
+          ]
+        }
+      },
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1640,
+        750
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "9",
+          "name": "Zendesk sandbox (admin)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "url": "=https://quotatis1612253627.zendesk.com/api/v2/users/me",
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "cache-control",
+              "value": "no-cache"
+            }
+          ]
+        }
+      },
+      "name": "users/me",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        20,
+        530
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "8",
+          "name": "Zendesk sandbox"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Code here will run only once, no matter how many input items there are.\n// More info and help: https://docs.n8n.io/nodes/n8n-nodes-base.function\n\n// Loop over inputs and add a new field called 'myNewField' to the JSON of each one\nfor (item of items) {\n  item.json.id = '';\n  for (ticket of item.json.tickets) {\n    let orderId = false;\n    let eventId = false;\n    for (field of ticket.custom_fields) {\n      if ($node[\"Initialize\"].json[\"env\"][\"eventId\"] === field.id && $node[\"Initialize\"].json[\"eventId\"] === field.value) {\n        eventId = true;\n      }\n      if ($node[\"Initialize\"].json[\"env\"][\"orderId\"] === field.id && $node[\"Initialize\"].json[\"orderId\"] === field.value) {\n        orderId = true;\n      }\n    }\n    if (orderId && eventId) {\n      item.json.id = ticket.id;\n    }\n  }\n}\n\n// You can write logs to the browser console\nconsole.log('Done!');\n\nreturn items;\n"
+      },
+      "name": "check tickets orderId/eventId",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1830,
+        770
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "passThrough",
+        "output": "input2"
+      },
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 1,
+      "position": [
+        490,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$node[\"Merge\"].json[\"itemData\"][\"url\"]}}",
+        "responseFormat": "file",
+        "options": {}
+      },
+      "name": "get files",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "requestMethod": "POST",
+        "url": "=https://quotatis1612253627.zendesk.com/api/v2/uploads?filename={{$node[\"get files\"].binary.data.fileName}}",
+        "jsonParameters": true,
+        "options": {
+          "bodyContentType": "raw",
+          "bodyContentCustomMimeType": "application/binary"
+        },
+        "sendBinaryData": true,
+        "binaryPropertyName": "=data"
+      },
+      "name": "upload attachments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1190,
+        900
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "8",
+          "name": "Zendesk sandbox"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "if (undefined === items[0].json.attachments) {\n  return [{json: {itemData: []}}];\n}\n\nreturn items[0].json.attachments.map(item => { \n  return { \n    json: {\n      itemData: item,\n    }\n  }\n});\n"
+      },
+      "name": "split attachments",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        280,
+        800
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "functionCode": "return [\n  {\n    json: {\n      data: items.map(item => {\n        return item.json.upload.token;\n      }),\n    }\n  }\n];\n"
+      },
+      "name": "combine upload tokens",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        890
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Initialize\"].json[\"hasAttachments\"]}}",
+              "operation": "isEmpty"
+            }
+          ],
+          "boolean": []
+        }
+      },
+      "name": "IF3",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        790
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Merge\"].json[\"itemData\"][\"url\"]}}",
+              "operation": "isEmpty"
+            }
+          ]
+        }
+      },
+      "name": "IF4",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        730,
+        770
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Code here will run only once, no matter how many input items there are.\n// More info and help: https://docs.n8n.io/nodes/n8n-nodes-base.function\n\n// Loop over inputs and add a new field called 'myNewField' to the JSON of each one\n\nfor (item of items) {\n  const body = item.json['body'];\n  item.json.env = {};\n  item.json.env.eventType = 4415180709778;\n  item.json.env.eventId = 1900001215354;\n  item.json.env.orderId = 360023310760; \n\n  item.json.orderId = body.orderId;\n  item.json.eventId = body.eventId;\n  item.json.authorEmail = body.authorEmail;\n  item.json.authorFullName = body.authorFullName;\n  item.json.hasAttachments = body.attachments ? \"yes\" : \"\";\n  item.json.attachments = body.attachments ?? [];\n  item.json.message = body.message;\n  item.json.urlEngine = 'https://b2b-gw.qa.quotatis.com';\n}\n\n// You can write logs to the browser console\nconsole.log('Done!');\n\nreturn items;"
+      },
+      "name": "Initialize",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -410,
+        430
+      ]
+    }
+  ],
+  "settings": {},
+  "staticData": null,
+  "tags": [
+    {
+      "id": "1",
+      "name": "dev",
+      "createdAt": "2022-01-19T10:50:51.979Z",
+      "updatedAt": "2022-01-19T10:50:51.979Z"
+    }
+  ],
+  "updatedAt": "2022-01-21T09:47:20.310Z"
+}
