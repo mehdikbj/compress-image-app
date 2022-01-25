@@ -1,0 +1,554 @@
+{
+  "active": true,
+  "connections": {
+    "Airtable entrypoint": {
+      "main": [
+        [
+          {
+            "node": "Initialize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch author user": {
+      "main": [
+        [
+          {
+            "node": "Missing author?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch store user": {
+      "main": [
+        [
+          {
+            "node": "Missing author?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create ticket": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use existing ticket": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Missing author?": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch store user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Missing input data?": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch author user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Missing author?1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ticket not existing?": {
+      "main": [
+        [
+          {
+            "node": "Create ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Use existing ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Function1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function1": {
+      "main": [
+        [
+          {
+            "node": "Ticket not existing?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize": {
+      "main": [
+        [
+          {
+            "node": "Missing input data?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2021-12-16T14:13:44.394Z",
+  "id": "1002",
+  "name": "[DEV] QTT-5255 (Send message as RC)",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        -490,
+        270
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "dev/messages_airtable",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Airtable entrypoint",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -490,
+        500
+      ],
+      "webhookId": "c35b9233-364c-4100-a14b-6bd35cf0067a"
+    },
+    {
+      "parameters": {
+        "description": "={{$node[\"Initialize\"].json[\"message\"]}}",
+        "jsonParameters": true,
+        "additionalFieldsJson": "={\n   \"requester_id\":{{$node[\"Fetch store user\"].json[\"id\"]}},\n   \"submitter_id\":{{$node[\"Fetch author user\"].json[\"id\"]}},\n   \"external_id\":\"1_{{$node[\"Initialize\"].json[\"orderId\"]}}\",\n   \"recipient\":\"poseleroymerlin@quotatis1612253627.zendesk.com\",\n   \"subject\": \"{{$node[\"Initialize\"].json[\"subject\"]}}\",\n   \"comment\": {\"body\":\"{{$node[\"Initialize\"].json[\"message\"]}}\"},\n   \"status\":\"pending\",\n   \"custom_fields\":[\n      {\n         \"id\":{{$node[\"Initialize\"].json[\"env\"][\"eventId\"]}},\n         \"value\":\"{{$node[\"Initialize\"].json[\"eventId\"]}}\"\n      },\n      {\n         \"id\":{{$node[\"Initialize\"].json[\"env\"][\"orderId\"]}},\n         \"value\":\"{{$node[\"Initialize\"].json[\"orderId\"]}}\"\n      },\n      {\n         \"id\":{{$node[\"Initialize\"].json[\"env\"][\"eventType\"]}},\n         \"value\":\"{{$node[\"Initialize\"].json[\"eventType\"]}}\"\n      }\n   ]\n}"
+      },
+      "name": "Create ticket",
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        710
+      ],
+      "credentials": {
+        "zendeskApi": {
+          "id": "1",
+          "name": "Zendesk account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "id": "={{$node[\"Function1\"].json[\"id\"]}}",
+        "jsonParameters": true,
+        "updateFieldsJson": "={\"status\":\"pending\", \"comment\": { \"body\": \"{{$node[\"Initialize\"].json[\"message\"]}}\", \"author_id\": {{$node[\"Fetch author user\"].json[\"id\"]}}}}"
+      },
+      "name": "Use existing ticket",
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        900
+      ],
+      "credentials": {
+        "zendeskApi": {
+          "id": "1",
+          "name": "Zendesk account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "user",
+        "operation": "search",
+        "limit": 1,
+        "filters": {
+          "query": "=type:user email:{{$node[\"Initialize\"].json[\"storeEmail\"]}}"
+        }
+      },
+      "name": "Fetch store user",
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
+      "position": [
+        490,
+        710
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "zendeskApi": {
+          "id": "1",
+          "name": "Zendesk account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "user",
+        "operation": "search",
+        "limit": 1,
+        "filters": {
+          "query": "=type:user email:{{$node[\"Initialize\"].json[\"authorEmail\"]}}"
+        }
+      },
+      "name": "Fetch author user",
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
+      "position": [
+        110,
+        590
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "zendeskApi": {
+          "id": "1",
+          "name": "Zendesk account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"code\":\"400\", \"description\":\"Missing input data\"}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        110,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"code\":\"400\", \"description\":\"Missing author: {{$json[\"error\"]}}\"}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "name": "Respond to Webhook1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        500,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Fetch author user\"].json[\"id\"]}}",
+              "operation": "isEmpty"
+            }
+          ]
+        }
+      },
+      "name": "Missing author?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        290,
+        590
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Initialize\"].json[\"eventId\"]}}",
+              "operation": "isEmpty"
+            },
+            {
+              "value1": "={{$node[\"Initialize\"].json[\"orderId\"]}}",
+              "operation": "isEmpty"
+            },
+            {
+              "value1": "={{$node[\"Initialize\"].json[\"authorEmail\"]}}",
+              "operation": "isEmpty"
+            },
+            {
+              "value1": "={{$node[\"Initialize\"].json[\"storeEmail\"]}}",
+              "operation": "isEmpty"
+            },
+            {
+              "value1": "={{$node[\"Initialize\"].json[\"message\"]}}",
+              "operation": "isEmpty"
+            },
+            {
+              "value1": "={{$node[\"Initialize\"].json[\"subject\"]}}",
+              "operation": "isEmpty"
+            },
+            {
+              "value1": "={{$node[\"Initialize\"].json[\"eventType\"]}}",
+              "operation": "isEmpty"
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "name": "Missing input data?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -90,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Fetch store user\"].json[\"id\"]}}",
+              "operation": "isEmpty"
+            }
+          ],
+          "dateTime": [],
+          "boolean": []
+        },
+        "combineOperation": "any"
+      },
+      "name": "Missing author?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        680,
+        710
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"code\":\"400\", \"description\":\"Missing store\"}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "name": "Respond to Webhook2",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        850,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json[\"id\"]}}",
+              "operation": "isEmpty"
+            }
+          ],
+          "boolean": [],
+          "string": []
+        }
+      },
+      "name": "Ticket not existing?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        820
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"code\":\"200\", \"url\":\"https://quotatis1612253627.zendesk.com/agent/tickets/{{$json[\"id\"]}}\"}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "name": "Respond to Webhook3",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1620,
+        810
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "url": "=https://quotatis1612253627.zendesk.com/api/v2/tickets?external_id=1_{{$node[\"Initialize\"].json[\"orderId\"]}}",
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "cache-control",
+              "value": "no-cache"
+            }
+          ]
+        },
+        "queryParametersUi": {
+          "parameter": []
+        }
+      },
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        720,
+        970
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "8",
+          "name": "Zendesk sandbox"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "url": "=https://quotatis1612253627.zendesk.com/api/v2/search.json?query=type%3Aticket+custom_field_1900001215354%3A{{$node[\"Initialize\"].json[\"eventId\"]}}+custom_field_360023310760%3A{{$node[\"Initialize\"].json[\"orderId\"]}}+external_id%3A1_{{$node[\"Initialize\"].json[\"orderId\"]}}&cache={{$node[\"Initialize\"].json[\"time\"]}}",
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "cache-control",
+              "value": "no-cache"
+            }
+          ]
+        },
+        "queryParametersUi": {
+          "parameter": []
+        }
+      },
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        810,
+        1140
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "8",
+          "name": "Zendesk sandbox"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Code here will run only once, no matter how many input items there are.\n// More info and help: https://docs.n8n.io/nodes/n8n-nodes-base.function\n\n// Loop over inputs and add a new field called 'myNewField' to the JSON of each one\nfor (item of items) {\n  item.json.id = '';\n  for (ticket of item.json.tickets) {\n    let orderId = false;\n    let eventId = false;\n    for (field of ticket.custom_fields) {\n      if ($node[\"Initialize\"].json[\"env\"][\"eventId\"] === field.id && $node[\"Initialize\"].json[\"eventId\"] === field.value) {\n        eventId = true;\n      }\n      \n      if ($node[\"Initialize\"].json[\"env\"][\"orderId\"] === field.id && $node[\"Initialize\"].json[\"orderId\"] === field.value) {\n         orderId = true;\n      }\n    }\n    if (orderId && eventId) {\n      item.json.id = ticket.id;\n    }\n  }\n}\n\n// You can write logs to the browser console\nconsole.log('Done!');\n\nreturn items;"
+      },
+      "name": "Function1",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        900,
+        930
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "for (item of items) {\n  const body = JSON.parse(item.json['body']);\n  item.json.env = {};\n  item.json.env.eventType = 4415180709778;\n  item.json.env.eventId = 1900001215354;\n  item.json.env.orderId = 360023310760;\n  \n  item.json.orderId = body.orderId;\n  item.json.eventId = body.eventId;\n  item.json.eventType = body.eventType;\n  item.json.authorEmail = body.authorEmail;\n  item.json.storeEmail = body.storeEmail;\n  item.json.subject = body.subject;\n  item.json.message = body.message;\n  item.json.time = new Date().getTime();\n}\n\nreturn items;"
+      },
+      "name": "Initialize",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -310,
+        500
+      ]
+    }
+  ],
+  "settings": {},
+  "staticData": null,
+  "tags": [
+    {
+      "id": "1",
+      "name": "dev",
+      "createdAt": "2022-01-19T10:50:51.979Z",
+      "updatedAt": "2022-01-19T10:50:51.979Z"
+    }
+  ],
+  "updatedAt": "2022-01-21T13:27:22.578Z"
+}
